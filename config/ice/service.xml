@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 服务类 -->
+	<bean id="accountService" class="com.cwa.server.account.AccountService">
+		<property name="fidLength" value="${fid_length}" />
+		<property name="cidLength" value="${cid_length}" />
+		<property name="ridLength" value="${rid_length}" />
+	</bean>
+
+	<!-- ice service实现类 -->
+	<bean id="accountServiceI" class="com.cwa.server.account.service.AccountServiceI">
+		<property name="accountService" ref="accountService" />
+	</bean>
+
+	<bean id="newRegionInfoEventHandler" class="com.cwa.server.account.event.NewRegionInfoEventHandler" >
+		<property name="service" ref="accountService" />
+	</bean>
+	<bean id="eventHandlerMap" class="java.util.HashMap">
+		<constructor-arg>
+			<map>
+				<entry key="serverice.config.NewRegionEvent" value-ref="newRegionInfoEventHandler" /> 
+			</map>
+		</constructor-arg>
+	</bean>
+	<bean id="eventListenerI" class="com.cwa.component.event.ice.EventListenerI">
+		<property name="eventHandlerMap" ref="eventHandlerMap" />
+	</bean>
+
+	<bean id="serviceImplMap" class="java.util.HashMap">
+		<constructor-arg>
+			<map>
+				<!-- {serviceName:serviceI} -->
+				<entry key="IAccountService" value-ref="accountServiceI" />
+				<entry key="IEventListener" value-ref="eventListenerI" />
+			</map>
+		</constructor-arg>
+	</bean>
+</beans>
